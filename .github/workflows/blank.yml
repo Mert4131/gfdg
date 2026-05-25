@@ -23,19 +23,25 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Reset and Fix Properties
+      - name: Reset and Force Modern Properties
         run: |
-          # Eski hatalı Windows yollarını tamamen silip sıfırdan temiz ayar yazıyoruz
-          echo "minecraft_version=1.21.8" > gradle.properties
-          echo "yarn_mappings=1.21.8+build.1" >> gradle.properties
-          echo "fabric_version=0.108.1+1.21.8" >> gradle.properties
-          echo "meteor_version=0.6.1" >> gradle.properties
-          echo "org.gradle.jvmargs=-Xmx2G" >> gradle.properties
+          # Mevcut gradle.properties dosyasını tamamen sıfırlayıp 1.21.8 ve modern Loom için uyumlu hale getiriyoruz
+          cat << EOF > gradle.properties
+          minecraft_version=1.21.8
+          yarn_mappings=1.21.8+build.1
+          fabric_version=0.108.1+1.21.8
+          meteor_version=0.6.1
+          
+          # Loom ve Gradle sürüm uyuşmazlıklarını önlemek için zorunlu argümanlar
+          org.gradle.jvmargs=-Xmx2G
+          org.gradle.parallel=true
+          org.gradle.caching=true
+          EOF
 
       - name: Build Mod
         run: |
           chmod +x gradlew
-          ./gradlew build -x test
+          ./gradlew build -x test --no-daemon
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
