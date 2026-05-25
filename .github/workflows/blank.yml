@@ -23,17 +23,15 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Reset and Force Modern Properties
+      - name: Reset and Inject Required Properties
         run: |
-          # Mevcut gradle.properties dosyasını tamamen sıfırlayıp 1.21.8 ve modern Loom için uyumlu hale getiriyoruz
+          # Kodun hata vermemesi için eksik olan tüm değişkenleri tek tek içeri enjekte ediyoruz
           cat << EOF > gradle.properties
-          minecraft_version=1.21.8
-          yarn_mappings=1.21.8+build.1
-          fabric_version=0.108.1+1.21.8
-          meteor_version=0.6.1
+          archives_base_name=ZincAddon
+          maven_group=com.vrzt.zinc
           
-          # Loom ve Gradle sürüm uyuşmazlıklarını önlemek için zorunlu argümanlar
-          org.gradle.jvmargs=-Xmx2G
+          # Replit'in bozduğu veya eksik kalan diğer temel ayarlar
+          org.gradle.jvmargs=-Xmx3G
           org.gradle.parallel=true
           org.gradle.caching=true
           EOF
