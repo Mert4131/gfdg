@@ -1,0 +1,42 @@
+name: Minecraft Mod Build
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Unrar Files
+        run: |
+          sudo apt-get install unrar
+          unrar x -o+ meteor-addon-template-master.rar
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Fix Version Properties
+        run: |
+          echo "minecraft_version=1.21.8" >> gradle.properties
+          echo "yarn_mappings=1.21.8+build.1" >> gradle.properties
+          echo "fabric_version=0.108.1+1.21.8" >> gradle.properties
+          echo "meteor_version=0.6.1" >> gradle.properties
+
+      - name: Build Mod
+        run: |
+          chmod +x gradlew
+          ./gradlew build -x test
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zinc-Addon-1.21.8
+          path: build/libs/*.jar
